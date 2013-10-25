@@ -31,6 +31,8 @@
 
   <include file="$(find baxter_hydra_teleop)/launch/tf.launch"/>
 
+  <node pkg="baxter_hydra_teleop" type="teleop.py" name="baxter_hydra_teleop" output="screen" respawn="true"/>
+
   <node name="rviz" pkg="rviz" type="rviz" output="screen" args="--display-config $(find baxter_hydra_teleop)/rviz/teleop.rviz" />
 
 </launch>
