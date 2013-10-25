@@ -60,9 +60,9 @@ class LimbMover:
         self.limb = limb
         self.interface = baxter_interface.Limb(limb)
         self.solver = IKSolver(limb)
+        self.running = True
         self.thread = threading.Thread(target=self.update_thread)
         self.thread.start()
-        self.running = True
 
     def set_target(self, joints):
         self.target_joints = joints
@@ -82,6 +82,7 @@ class LimbMover:
         while not rospy.is_shutdown() and self.running:
             self.interface.set_joint_positions(self.solver.solution)
             rate.sleep()
+        print "Stopped %s" % self.limb
 
 
 class IKSolver:
@@ -139,7 +140,6 @@ class Teleop:
 
         rospy.on_shutdown(self.cleanup)
         sub = rospy.Subscriber("/hydra_calib", Hydra, self.hydra_cb)
-        rospy.spin()
 
     def hydra_cb(self, msg):
         map(self.stop_on_buttons, msg.paddles)
@@ -161,7 +161,6 @@ class Teleop:
         self.mover_right.stop_thread()
         print("Disabling robot... ")
         self.rs.disable()
-        sys.exit(1)
 
 
 if __name__ == '__main__':
