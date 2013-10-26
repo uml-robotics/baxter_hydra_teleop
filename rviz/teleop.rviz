@@ -6,11 +6,9 @@ Panels:
       Expanded:
         - /Global Options1
         - /TF1/Frames1
-        - /Group1
-        - /Group1/hydra1
-        - /Group1/gripper_curr1
-        - /Group1/gripper goal1
-        - /Range1/Status1
+        - /left1/hydra1
+        - /left1/gripper_curr1
+        - /left1/gripper goal1
       Splitter Ratio: 0.795775
     Tree Height: 775
   - Class: rviz/Selection
@@ -289,16 +287,22 @@ Visualization Manager:
       Value: true
       Visibility:
         Grid: true
-        Group:
+        OculusDisplay: true
+        RobotModel: true
+        TF: true
+        Value: true
+        left:
+          Range: true
           Value: true
           gripper goal: true
           gripper_curr: true
           hydra: true
-        OculusDisplay: true
-        Range: true
-        RobotModel: true
-        TF: true
-        Value: true
+        right:
+          Range: true
+          Value: true
+          gripper goal: true
+          gripper_curr: true
+          hydra: true
       Zoom Factor: 0.5
     - Class: oculus_rviz_plugins/OculusDisplay
       Enabled: false
@@ -353,16 +357,49 @@ Visualization Manager:
           Radius: 0.005
           Reference Frame: reference/left_gripper
           Value: true
+        - Alpha: 0.5
+          Buffer Length: 1
+          Class: rviz/Range
+          Color: 255; 255; 255
+          Enabled: true
+          Name: Range
+          Topic: /robot/range/left_hand_range
+          Value: true
       Enabled: true
-      Name: Group
-    - Alpha: 0.5
-      Buffer Length: 1
-      Class: rviz/Range
-      Color: 255; 255; 255
+      Name: left
+    - Class: rviz/Group
+      Displays:
+        - Class: rviz/Axes
+          Enabled: true
+          Length: 0.11
+          Name: hydra
+          Radius: 0.005
+          Reference Frame: hydra_right_grab
+          Value: true
+        - Class: rviz/Axes
+          Enabled: true
+          Length: 0.11
+          Name: gripper_curr
+          Radius: 0.005
+          Reference Frame: right_gripper
+          Value: true
+        - Class: rviz/Axes
+          Enabled: true
+          Length: 0.07
+          Name: gripper goal
+          Radius: 0.005
+          Reference Frame: reference/right_gripper
+          Value: true
+        - Alpha: 0.5
+          Buffer Length: 1
+          Class: rviz/Range
+          Color: 255; 255; 255
+          Enabled: true
+          Name: Range
+          Topic: /robot/range/right_hand_range
+          Value: true
       Enabled: true
-      Name: Range
-      Topic: /robot/range/left_hand_range
-      Value: true
+      Name: right
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
