@@ -103,6 +103,21 @@ class IKSolver:
         rospy.wait_for_service(ns)
         self.iksvc = rospy.ServiceProxy(ns, SolvePositionIK)
         self.solution = dict()
+        self.mapping = [
+            # Human-like mapping (front of camera  = front of the wrist)
+            Quaternion(
+                x=0,
+                y=0.7071067811865475244,  # sqrt(0.5)
+                z=0,
+                w=0.7071067811865475244  # sqrt(0.5)
+            # Camera is pointing down
+            ), Quaternion(
+                x=0,
+                y=1,
+                z=0,
+                w=0
+            ),
+        ]
 
     def solve(self):
         ikreq = SolvePositionIKRequest()
@@ -112,12 +127,7 @@ class IKSolver:
             header=hdr,
             pose=Pose(
                 position=Point(x=0, y=0, z=0),
-                orientation=Quaternion(
-                    x=0,
-                    y=0.7071067811865475244,  # sqrt(0.5)
-                    z=0,
-                    w=0.7071067811865475244  # sqrt(0.5)
-                ),
+                orientation=self.mapping[1]
             ),
         )
 
