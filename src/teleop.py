@@ -60,6 +60,7 @@ class LimbMover:
         self.limb = limb
         self.interface = baxter_interface.Limb(limb)
         self.solver = IKSolver(limb)
+        self.last_solve_request_time = rospy.Time.now()
         self.running = True
         self.thread = threading.Thread(target=self.update_thread)
 
@@ -69,8 +70,17 @@ class LimbMover:
     def set_target(self, joints):
         self.target_joints = joints
 
+    def update_req_time(self):
+        self.last_solve_request_time = rospy.Time.now()
+
+    def solver_cooled_down(self):
+        time_since_req = rospy.Time.now() - self.last_solve_request_time
+        return time_since_req > rospy.Duration(0.05)
+
     def parse_joy(self, joypad):
-        if joypad.buttons[0]:
+        # Throttle service requests
+        if joypad.buttons[0] and self.solver_cooled_down():
+            self.update_req_time()
             self.solver.solve()
 
     def stop_thread(self):
