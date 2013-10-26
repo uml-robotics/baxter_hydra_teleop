@@ -78,12 +78,12 @@ class LimbMover:
         self.thread.join()
 
     def update_thread(self):
-        print "Starting Joint Update Thread: %s\n" % self.limb
+        rospy.loginfo("Starting Joint Update Thread: %s\n" % self.limb)
         rate = rospy.Rate(200)
         while not rospy.is_shutdown() and self.running:
             self.interface.set_joint_positions(self.solver.solution)
             rate.sleep()
-        print "Stopped %s" % self.limb
+        rospy.loginfo("Stopped %s" % self.limb)
 
 
 class IKSolver:
@@ -120,16 +120,16 @@ class IKSolver:
         if (resp.isValid[0]):
             self.solution = dict(
                 zip(resp.joints[0].names, resp.joints[0].angles))
-            print "Solution Found, %s" % self.limb, self.solution
+            rospy.loginfo("Solution Found, %s" % self.limb, self.solution)
 
         else:
-            print "INVALID POSE for %s" % self.limb
+            rospy.logwarn("INVALID POSE for %s" % self.limb)
 
 
 class Teleop:
     def __init__(self):
         rospy.init_node("baxter_hydra_teleop")
-        print("Getting robot state... ")
+        rospy.loginfo("Getting robot state... ")
         self.rs = baxter_interface.RobotEnable()
 
         self.gripper_left = baxter_interface.Gripper("left")
@@ -140,11 +140,12 @@ class Teleop:
         rospy.on_shutdown(self.cleanup)
         sub = rospy.Subscriber("/hydra_calib", Hydra, self.hydra_cb)
 
-        print("Press left or right button on Hydra to start the teleop")
+        rospy.loginfo(
+          "Press left or right button on Hydra to start the teleop")
         self.enabled = False  # We wait until the user presses a button
         while not self.enabled:
             pass
-        print("Enabling robot... ")
+        rospy.loginfo("Enabling robot... ")
         self.rs.enable()
         self.mover_left.enable()
         self.mover_right.enable()
@@ -172,7 +173,7 @@ class Teleop:
     def cleanup(self):
         self.mover_left.stop_thread()
         self.mover_right.stop_thread()
-        print("Disabling robot... ")
+        rospy.loginfo("Disabling robot... ")
         self.rs.disable()
 
 
