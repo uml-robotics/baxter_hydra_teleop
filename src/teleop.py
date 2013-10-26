@@ -62,6 +62,8 @@ class LimbMover:
         self.solver = IKSolver(limb)
         self.running = True
         self.thread = threading.Thread(target=self.update_thread)
+
+    def enable(self):
         self.thread.start()
 
     def set_target(self, joints):
@@ -76,8 +78,7 @@ class LimbMover:
         self.thread.join()
 
     def update_thread(self):
-        global running
-        print "Starting Joint Update Thread: %s" % self.limb
+        print "Starting Joint Update Thread: %s\n" % self.limb
         rate = rospy.Rate(200)
         while not rospy.is_shutdown() and self.running:
             self.interface.set_joint_positions(self.solver.solution)
@@ -117,9 +118,9 @@ class IKSolver:
             rospy.loginfo("Service call failed: %s" % (e,))
 
         if (resp.isValid[0]):
-            print "Solution Found, %s" % self.limb
             self.solution = dict(
                 zip(resp.joints[0].names, resp.joints[0].angles))
+            print "Solution Found, %s" % self.limb, self.solution
 
         else:
             print "INVALID POSE for %s" % self.limb
@@ -130,8 +131,6 @@ class Teleop:
         rospy.init_node("baxter_hydra_teleop")
         print("Getting robot state... ")
         self.rs = baxter_interface.RobotEnable()
-        print("Enabling robot... ")
-        self.rs.enable()
 
         self.gripper_left = baxter_interface.Gripper("left")
         self.gripper_right = baxter_interface.Gripper("right")
@@ -141,7 +140,20 @@ class Teleop:
         rospy.on_shutdown(self.cleanup)
         sub = rospy.Subscriber("/hydra_calib", Hydra, self.hydra_cb)
 
+        print("Press left or right button on Hydra to start the teleop")
+        self.enabled = False  # We wait until the user presses a button
+        while not self.enabled:
+            pass
+        print("Enabling robot... ")
+        self.rs.enable()
+        self.mover_left.enable()
+        self.mover_right.enable()
+
     def hydra_cb(self, msg):
+        if not self.enabled:
+            self.enabled = (
+                msg.paddles[0].buttons[0] or msg.paddles[1].buttons[0])
+            return
         map(self.stop_on_buttons, msg.paddles)
         if not rospy.is_shutdown():
             self.mover_left.parse_joy(msg.paddles[0])
@@ -155,6 +167,7 @@ class Teleop:
         for x in val.buttons[1:]:
             if x:
                 self.cleanup()
+                return
 
     def cleanup(self):
         self.mover_left.stop_thread()
