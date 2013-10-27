@@ -62,7 +62,7 @@ import sensor_msgs.msg
 import vis
 
 
-class HeadMover:
+class HeadMover(object):
     def __init__(self):
         self._head = baxter_interface.Head()
         self.pan_angle = 0
@@ -79,7 +79,7 @@ class HeadMover:
             self.set_pose()
 
 
-class ImageStatus:
+class ImageStatus(object):
     def __init__(self):
         self.images = {
             'indifferent': self._get_image('gerty_indifferent.png'),
@@ -106,7 +106,7 @@ class ImageStatus:
             self.pub.publish(self.images[img_name])
 
 
-class LimbMover:
+class LimbMover(object):
     def __init__(self, limb):
         self.limb = limb
         self.interface = baxter_interface.Limb(limb)
@@ -152,7 +152,7 @@ class LimbMover:
         rospy.loginfo("Stopped %s" % self.limb)
 
 
-class IKSolver:
+class IKSolver(object):
     def __init__(self, limb):
         self.limb = limb
         ns = "/sdk/robot/limb/" + self.limb + "/solve_ik_position"
@@ -204,7 +204,7 @@ class IKSolver:
             return False
 
 
-class Teleop:
+class Teleop(object):
 
     hydra_msg_lock = threading.Lock()
     enabled = False  # We wait until the user presses a button

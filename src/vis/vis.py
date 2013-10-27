@@ -7,7 +7,7 @@ from std_msgs.msg import Header
 from visualization_msgs.msg import Marker
 
 
-class Vis:
+class Vis(object):
     def __init__(self):
         self.pub = rospy.Publisher(
             '/visualization_marker', Marker)
