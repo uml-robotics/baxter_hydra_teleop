@@ -115,7 +115,6 @@ class LimbMover:
         self.running = True
         self.thread = threading.Thread(target=self._update_thread)
         self.vis = vis.Vis()
-        self.vis.show_gripper(self.limb)
 
     def enable(self):
         self.thread.start()
@@ -130,11 +129,11 @@ class LimbMover:
         time_since_req = rospy.Time.now() - self.last_solve_request_time
         return time_since_req > rospy.Duration(0.05)  # 20 Hz
 
-    def parse_joy(self, joypad):
+    def update(self, trigger):
         self.vis.show_gripper(self.limb)
 
         # Throttle service requests
-        if joypad.buttons[0] and self._solver_cooled_down():
+        if trigger and self._solver_cooled_down():
             self._update_req_time()
             return self.solver.solve()
         return True
@@ -249,6 +248,9 @@ class Teleop:
         with self.hydra_msg_lock:
             msg = self.hydra_msg
 
+        self.mover_left.update(False)
+        self.mover_right.update(False)
+
         if not self.enabled:
             self.enabled = (
                 msg.paddles[0].buttons[0] or msg.paddles[1].buttons[0])
@@ -256,8 +258,8 @@ class Teleop:
         map(self._stop_on_buttons, msg.paddles)
         if not rospy.is_shutdown():
 
-            happy0 = self.mover_left.parse_joy(msg.paddles[0])
-            happy1 = self.mover_right.parse_joy(msg.paddles[1])
+            happy0 = self.mover_left.update(msg.paddles[0].buttons[0])
+            happy1 = self.mover_right.update(msg.paddles[1].buttons[0])
             if happy0 and happy1:
                 self.happy_count += 1
                 if self.happy_count > 200:
