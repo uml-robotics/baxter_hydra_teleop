@@ -54,6 +54,11 @@ from baxter_msgs.srv import SolvePositionIK
 from baxter_msgs.srv import SolvePositionIKRequest
 import baxter_interface
 
+# ImageStatus
+import cv
+import cv_bridge
+import sensor_msgs.msg
+
 
 class HeadMover:
     def __init__(self):
@@ -70,6 +75,33 @@ class HeadMover:
             if abs(self.pan_angle) > 1.57:
                 self.pan_angle -= increment
             self.set_pose()
+
+
+class ImageStatus:
+    def __init__(self):
+        self.images = {
+            'indifferent': self.getImage('gerty_indifferent.png'),
+            'happy': self.getImage('gerty_happy.png'),
+            'thinking_left': self.getImage('gerty_thinking_left.png'),
+            'thinking_right': self.getImage('gerty_thinking_right.png'),
+            'confused': self.getImage('gerty_confused.png'),
+            'unhappy': self.getImage('gerty_unhappy.png'),
+        }
+        self.current_image = ''
+        self.pub = rospy.Publisher(
+            '/sdk/xdisplay', sensor_msgs.msg.Image, latch=True)
+        self.setImage('indifferent')
+
+    def getImage(self, path):
+        img = cv.LoadImage(
+            roslib.packages.get_pkg_dir('baxter_faces') + '/img/' + path)
+        return cv_bridge.CvBridge().cv_to_imgmsg(img)
+
+    def setImage(self, img_name):
+        if self.current_image != img_name:
+            self.current_image = img_name
+            rospy.logdebug("Setting Head Image: %s" % img_name)
+            self.pub.publish(self.images[img_name])
 
 
 class LimbMover:
@@ -98,7 +130,8 @@ class LimbMover:
         # Throttle service requests
         if joypad.buttons[0] and self.solver_cooled_down():
             self.update_req_time()
-            self.solver.solve()
+            return self.solver.solve()
+        return True
 
     def stop_thread(self):
         self.running = False
@@ -137,6 +170,7 @@ class IKSolver:
         ]
 
     def solve(self):
+        global status_display
         ikreq = SolvePositionIKRequest()
         hdr = Header(
             stamp=rospy.Time.now(), frame_id='hydra_' + self.limb + '_grab')
@@ -158,14 +192,18 @@ class IKSolver:
             self.solution = dict(
                 zip(resp.joints[0].names, resp.joints[0].angles))
             rospy.loginfo("Solution Found, %s" % self.limb, self.solution)
+            return True
 
         else:
             rospy.logwarn("INVALID POSE for %s" % self.limb)
+            return False
 
 
 class Teleop:
     def __init__(self):
+        global status_display
         rospy.init_node("baxter_hydra_teleop")
+        status_display = ImageStatus()
         rospy.loginfo("Getting robot state... ")
         self.rs = baxter_interface.RobotEnable()
 
@@ -174,6 +212,7 @@ class Teleop:
         self.mover_left = LimbMover("left")
         self.mover_right = LimbMover("right")
         self.mover_head = HeadMover()
+        self.happy_count = 0  # Need inertia on how long unhappy is displayed
 
         rospy.on_shutdown(self.cleanup)
         sub = rospy.Subscriber("/hydra_calib", Hydra, self.hydra_cb)
@@ -188,6 +227,7 @@ class Teleop:
         self.mover_left.enable()
         self.mover_right.enable()
         self.mover_head.set_pose()
+        status_display.setImage('happy')
 
     def hydra_cb(self, msg):
         if not self.enabled:
@@ -196,8 +236,17 @@ class Teleop:
             return
         map(self.stop_on_buttons, msg.paddles)
         if not rospy.is_shutdown():
-            self.mover_left.parse_joy(msg.paddles[0])
-            self.mover_right.parse_joy(msg.paddles[1])
+
+            happy0 = self.mover_left.parse_joy(msg.paddles[0])
+            happy1 = self.mover_right.parse_joy(msg.paddles[1])
+            if happy0 and happy1:
+                self.happy_count += 1
+                if self.happy_count > 200:
+                    status_display.setImage('happy')
+            else:
+                self.happy_count = 0
+                status_display.setImage('confused')
+
             happy0 = self.mover_head.parse_joy(msg.paddles[0])
             self.gripper_left.set_position(
                 100 * (1 - msg.paddles[0].trigger))
