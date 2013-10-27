@@ -59,6 +59,8 @@ import cv
 import cv_bridge
 import sensor_msgs.msg
 
+import vis
+
 
 class HeadMover:
     def __init__(self):
@@ -112,6 +114,7 @@ class LimbMover:
         self.last_solve_request_time = rospy.Time.now()
         self.running = True
         self.thread = threading.Thread(target=self.update_thread)
+        self.vis = vis.Vis()
 
     def enable(self):
         self.thread.start()
@@ -127,6 +130,8 @@ class LimbMover:
         return time_since_req > rospy.Duration(0.05)
 
     def parse_joy(self, joypad):
+        self.vis.show_gripper(self.limb)
+
         # Throttle service requests
         if joypad.buttons[0] and self.solver_cooled_down():
             self.update_req_time()
