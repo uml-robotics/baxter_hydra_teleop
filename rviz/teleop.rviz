@@ -5,12 +5,9 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /Grid1/Line Style1
-        - /Grid1/Offset1
         - /TF1/Frames1
-        - /left1/hydra1
-        - /left1/hydra1/Status1
-        - /right1/Camera Right1/Visibility1
+        - /Marker1
+        - /Marker1/Status1
       Splitter Ratio: 0.795775
     Tree Height: 365
   - Class: rviz/Selection
@@ -38,18 +35,18 @@ Panels:
     Property Tree Widget:
       Expanded: ~
       Splitter Ratio: 0.5
-    Tree Height: 359
+    Tree Height: 337
 Visualization Manager:
   Class: ""
   Displays:
-    - Alpha: 0.5
+    - Alpha: 0.2
       Cell Size: 0.0735
       Class: rviz/Grid
       Color: 191; 191; 191
       Enabled: true
       Line Style:
         Line Width: 0.005
-        Value: Lines
+        Value: Billboards
       Name: Grid
       Normal Cell Count: 0
       Offset:
@@ -318,26 +315,26 @@ Visualization Manager:
     - Class: rviz/Group
       Displays:
         - Class: rviz/Axes
-          Enabled: true
+          Enabled: false
           Length: 0.11
           Name: hydra
           Radius: 0.005
           Reference Frame: hydra_left_grab
-          Value: true
+          Value: false
         - Class: rviz/Axes
-          Enabled: true
+          Enabled: false
           Length: 0.11
           Name: gripper_curr
           Radius: 0.005
           Reference Frame: left_gripper
-          Value: true
+          Value: false
         - Class: rviz/Axes
-          Enabled: true
+          Enabled: false
           Length: 0.07
           Name: gripper goal
           Radius: 0.005
           Reference Frame: reference/left_gripper
-          Value: true
+          Value: false
         - Alpha: 0.5
           Buffer Length: 1
           Class: rviz/Range
@@ -351,12 +348,13 @@ Visualization Manager:
           Image Rendering: background and overlay
           Image Topic: /cameras/left_hand_camera/image
           Name: Camera Left
-          Overlay Alpha: 0.5
+          Overlay Alpha: 0
           Queue Size: 2
           Transport Hint: raw
           Value: true
           Visibility:
             Grid: true
+            Marker: true
             OculusDisplay: true
             RobotModel: true
             TF: true
@@ -380,26 +378,26 @@ Visualization Manager:
     - Class: rviz/Group
       Displays:
         - Class: rviz/Axes
-          Enabled: true
+          Enabled: false
           Length: 0.11
           Name: hydra
           Radius: 0.005
           Reference Frame: hydra_right_grab
-          Value: true
+          Value: false
         - Class: rviz/Axes
-          Enabled: true
+          Enabled: false
           Length: 0.11
           Name: gripper_curr
           Radius: 0.005
           Reference Frame: right_gripper
-          Value: true
+          Value: false
         - Class: rviz/Axes
-          Enabled: true
+          Enabled: false
           Length: 0.07
           Name: gripper goal
           Radius: 0.005
           Reference Frame: reference/right_gripper
-          Value: true
+          Value: false
         - Alpha: 0.5
           Buffer Length: 1
           Class: rviz/Range
@@ -413,12 +411,13 @@ Visualization Manager:
           Image Rendering: background and overlay
           Image Topic: /cameras/right_hand_camera/image
           Name: Camera Right
-          Overlay Alpha: 0.5
+          Overlay Alpha: 0
           Queue Size: 2
           Transport Hint: raw
           Value: true
           Visibility:
             Grid: true
+            Marker: true
             OculusDisplay: true
             RobotModel: true
             TF: true
@@ -439,9 +438,18 @@ Visualization Manager:
           Zoom Factor: 0.75
       Enabled: true
       Name: right
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: visualization_marker
+      Name: Marker
+      Namespaces:
+        left: true
+        right: true
+      Queue Size: 50
+      Value: true
   Enabled: true
   Global Options:
-    Background Color: 48; 48; 48
+    Background Color: 106; 112; 132
     Fixed Frame: base
     Frame Rate: 30
   Name: root
@@ -463,17 +471,17 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 1.08306
+      Distance: 0.726721
       Focal Point:
-        X: 0.931271
-        Y: -0.033151
-        Z: -0.0510099
+        X: 0.815489
+        Y: -0.00938846
+        Z: 0.00267689
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.42106
+      Pitch: 0.889797
       Target Frame: base
       Value: Orbit (rviz)
-      Yaw: 3.12101
+      Yaw: 3.14286
     Saved: ~
 Window Geometry:
   Camera Left:
@@ -483,9 +491,9 @@ Window Geometry:
   Displays:
     collapsed: false
   Height: 1056
-  Hide Left Dock: false
+  Hide Left Dock: true
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd000000040000000000000173000001fcfc0200000009fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006400fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c0061007900730100000206000001fc000000dd00fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb000000100044006900730070006c006100790073000000029500000129000000dd00ffffff000000010000010f000001fcfc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a005600690065007700730100000206000001fc000000b000fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000780000001d8fc0100000003fb0000001600430061006d0065007200610020004c0065006600740100000000000003dc0000008500fffffffb0000001800430061006d00650072006100200052006900670068007401000003e20000039e0000008d00fffffffb0000000a00560069006500770073030000004e00000080000002e10000019700000003000007800000003efc0100000002fb0000000800540069006d0065000000000000000780000002f600fffffffb0000000800540069006d00650100000000000004500000000000000000000004f2000001fc00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd000000040000000000000173000001fcfc0200000009fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006400fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c0061007900730000000206000001fc000000dd00fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb000000100044006900730070006c006100790073000000029500000129000000dd00ffffff000000010000010f000001fcfc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a005600690065007700730000000206000001fc000000b000fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b20000000000000000000000020000074f00000214fc0100000003fb0000001600430061006d0065007200610020004c0065006600740100000000000003c30000008500fffffffb0000001800430061006d00650072006100200052006900670068007401000003c9000003860000008d00fffffffb0000000a00560069006500770073030000004e00000080000002e10000019700000003000007800000003efc0100000002fb0000000800540069006d0065000000000000000780000002f600fffffffb0000000800540069006d006501000000000000045000000000000000000000074f000001e800000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730000000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -494,6 +502,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: false
-  Width: 1920
-  X: 1912
+  Width: 1871
+  X: 41
   Y: -4
