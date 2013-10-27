@@ -249,6 +249,8 @@ class Teleop:
         with self.hydra_msg_lock:
             msg = self.hydra_msg
 
+        self._terminate_if_pressed(msg)
+
         self.mover_left.update(False)
         self.mover_right.update(False)
 
@@ -256,7 +258,6 @@ class Teleop:
             self.enabled = (
                 msg.paddles[0].buttons[0] or msg.paddles[1].buttons[0])
             return
-        map(self._stop_on_buttons, msg.paddles)
         if not rospy.is_shutdown():
 
             happy0 = self.mover_left.update(msg.paddles[0].buttons[0])
@@ -275,11 +276,9 @@ class Teleop:
             self.gripper_right.set_position(
                 100 * (1 - msg.paddles[1].trigger))
 
-    def _stop_on_buttons(self, val):
-        for x in val.buttons[1:]:
-            if x:
-                self._cleanup()
-                return
+    def _terminate_if_pressed(self, hydra):
+        if(sum(hydra.paddles[0].buttons[1:] + hydra.paddles[1].buttons[1:0])):
+            self._cleanup()
 
     def _cleanup(self):
         self.mover_left.stop_thread()
