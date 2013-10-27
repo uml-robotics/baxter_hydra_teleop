@@ -13,6 +13,8 @@
   <depend package="baxter_interface"/>
   <depend package="utilities"/>
   <depend package="baxter_faces"/>
+  <depend package="visualization_msgs"/>
+
 
 </package>
 
