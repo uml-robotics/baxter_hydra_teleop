@@ -55,6 +55,23 @@ from baxter_msgs.srv import SolvePositionIKRequest
 import baxter_interface
 
 
+class HeadMover:
+    def __init__(self):
+        self._head = baxter_interface.Head()
+        self.pan_angle = 0
+
+    def set_pose(self):
+        self._head.set_pan(self.pan_angle)
+
+    def parse_joy(self, joypad):
+        if joypad.joy[0] != 0:
+            increment = -joypad.joy[0] / 200
+            self.pan_angle += increment
+            if abs(self.pan_angle) > 1.57:
+                self.pan_angle -= increment
+            self.set_pose()
+
+
 class LimbMover:
     def __init__(self, limb):
         self.limb = limb
@@ -156,6 +173,7 @@ class Teleop:
         self.gripper_right = baxter_interface.Gripper("right")
         self.mover_left = LimbMover("left")
         self.mover_right = LimbMover("right")
+        self.mover_head = HeadMover()
 
         rospy.on_shutdown(self.cleanup)
         sub = rospy.Subscriber("/hydra_calib", Hydra, self.hydra_cb)
@@ -169,6 +187,7 @@ class Teleop:
         self.rs.enable()
         self.mover_left.enable()
         self.mover_right.enable()
+        self.mover_head.set_pose()
 
     def hydra_cb(self, msg):
         if not self.enabled:
@@ -179,6 +198,7 @@ class Teleop:
         if not rospy.is_shutdown():
             self.mover_left.parse_joy(msg.paddles[0])
             self.mover_right.parse_joy(msg.paddles[1])
+            happy0 = self.mover_head.parse_joy(msg.paddles[0])
             self.gripper_left.set_position(
                 100 * (1 - msg.paddles[0].trigger))
             self.gripper_right.set_position(
