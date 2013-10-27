@@ -139,8 +139,9 @@ class LimbMover:
         return True
 
     def stop_thread(self):
-        self.running = False
-        self.thread.join()
+        if self.thread.is_alive():
+            self.running = False
+            self.thread.join()
 
     def _update_thread(self):
         rospy.loginfo("Starting Joint Update Thread: %s\n" % self.limb)
