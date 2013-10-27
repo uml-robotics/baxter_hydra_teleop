@@ -205,6 +205,10 @@ class IKSolver:
 
 
 class Teleop:
+
+    hydra_msg_lock = threading.Lock()
+    enabled = False  # We wait until the user presses a button
+
     def __init__(self):
         global _status_display
         rospy.init_node("baxter_hydra_teleop")
@@ -218,9 +222,12 @@ class Teleop:
         self.mover_right = LimbMover("right")
         self.mover_head = HeadMover()
         self.happy_count = 0  # Need inertia on how long unhappy is displayed
+        self.hydra_msg = Hydra()
 
         rospy.on_shutdown(self._cleanup)
         sub = rospy.Subscriber("/hydra_calib", Hydra, self._hydra_cb)
+
+        rospy.Timer(rospy.Duration(1.0 / 30), self._main_loop)
 
         rospy.loginfo(
           "Press left or right button on Hydra to start the teleop")
@@ -235,6 +242,13 @@ class Teleop:
         _status_display.set_image('happy')
 
     def _hydra_cb(self, msg):
+        with self.hydra_msg_lock:
+            self.hydra_msg = msg
+
+    def _main_loop(self, event):
+        with self.hydra_msg_lock:
+            msg = self.hydra_msg
+
         if not self.enabled:
             self.enabled = (
                 msg.paddles[0].buttons[0] or msg.paddles[1].buttons[0])
