@@ -32,7 +32,7 @@
   Baxter Teleoperation using Razer Hydra
 
 """
-import argparse
+
 import sys
 import threading
 
