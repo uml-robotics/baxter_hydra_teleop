@@ -115,6 +115,7 @@ class LimbMover:
         self.running = True
         self.thread = threading.Thread(target=self.update_thread)
         self.vis = vis.Vis()
+        self.vis.show_gripper(self.limb)
 
     def enable(self):
         self.thread.start()
