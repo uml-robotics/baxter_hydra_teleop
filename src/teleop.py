@@ -231,8 +231,8 @@ class Teleop:
 
         rospy.loginfo(
           "Press left or right button on Hydra to start the teleop")
-        self.enabled = False  # We wait until the user presses a button
-        while not self.enabled:
+        while not self.enabled and not rospy.is_shutdown():
+            rospy.Rate(10).sleep()
             pass
         rospy.loginfo("Enabling robot... ")
         self.rs.enable()
