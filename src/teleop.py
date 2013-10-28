@@ -54,10 +54,7 @@ from baxter_msgs.srv import SolvePositionIK
 from baxter_msgs.srv import SolvePositionIKRequest
 import baxter_interface
 
-# ImageStatus
-import cv
-import cv_bridge
-import sensor_msgs.msg
+import baxter_faces
 
 import vis
 
@@ -72,38 +69,11 @@ class HeadMover(object):
 
     def parse_joy(self, joypad):
         if joypad.joy[0] != 0:
-            increment = -joypad.joy[0] / 200
+            increment = -joypad.joy[0] / 50
             self.pan_angle += increment
             if abs(self.pan_angle) > 1.57:
                 self.pan_angle -= increment
             self.set_pose()
-
-
-class ImageStatus(object):
-    def __init__(self):
-        self.images = {
-            'indifferent': self._get_image('gerty_indifferent.png'),
-            'happy': self._get_image('gerty_happy.png'),
-            'thinking_left': self._get_image('gerty_thinking_left.png'),
-            'thinking_right': self._get_image('gerty_thinking_right.png'),
-            'confused': self._get_image('gerty_confused.png'),
-            'unhappy': self._get_image('gerty_unhappy.png'),
-        }
-        self.current_image = ''
-        self.pub = rospy.Publisher(
-            '/sdk/xdisplay', sensor_msgs.msg.Image, latch=True)
-        self.set_image('indifferent')
-
-    def _get_image(self, path):
-        img = cv.LoadImage(
-            roslib.packages.get_pkg_dir('baxter_faces') + '/img/' + path)
-        return cv_bridge.CvBridge().cv_to_imgmsg(img)
-
-    def set_image(self, img_name):
-        if self.current_image != img_name:
-            self.current_image = img_name
-            rospy.logdebug("Setting Head Image: %s" % img_name)
-            self.pub.publish(self.images[img_name])
 
 
 class LimbMover(object):
@@ -212,7 +182,7 @@ class Teleop(object):
     def __init__(self):
         global _status_display
         rospy.init_node("baxter_hydra_teleop")
-        _status_display = ImageStatus()
+        _status_display = baxter_faces.FaceImage()
         rospy.loginfo("Getting robot state... ")
         self.rs = baxter_interface.RobotEnable()
 
