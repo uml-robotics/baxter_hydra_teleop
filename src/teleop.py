@@ -236,10 +236,18 @@ class Teleop(object):
             pass
         rospy.loginfo("Enabling robot... ")
         self.rs.enable()
+        rospy.Timer(rospy.Duration(0.1), self._reset_grippers, oneshot=True)
         self.mover_left.enable()
         self.mover_right.enable()
         self.mover_head.set_pose()
         _status_display.set_image('happy')
+
+    def _reset_grippers(self, event):
+        rospy.loginfo('Resetting grippers')
+        self.gripper_left.reboot()
+        self.gripper_right.reboot()
+        self.gripper_left.calibrate()
+        self.gripper_right.calibrate()
 
     def _hydra_cb(self, msg):
         with self.hydra_msg_lock:
