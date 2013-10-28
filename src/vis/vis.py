@@ -5,6 +5,13 @@ import rospy
 from std_msgs.msg import Header
 
 from visualization_msgs.msg import Marker
+from std_msgs.msg import ColorRGBA
+from geometry_msgs.msg import (
+    Vector3,
+    Pose,
+    Point,
+    Quaternion
+)
 
 
 class Vis(object):
@@ -19,43 +26,43 @@ class Vis(object):
             return
         self.last_time = rospy.Time.now()
 
+        counter = 0
+
         hdr = Header(
-            #stamp=rospy.Time.now(), frame_id='left_gripper')
             stamp=rospy.Time.now(), frame_id='hydra_' + limb + '_grab')
 
         # Gripper projection
-        msg = Marker(header=hdr, ns=limb)
-        msg.scale.x = 0.009
-        msg.scale.y = 0.009
-        msg.scale.z = 0.11
-        msg.type = Marker.CYLINDER
-        msg.color.b = 0.5
-        msg.color.a = 0.8
-        msg.pose.position.z = -0.055
-        msg.pose.position.y = -0.025
-        msg.pose.orientation.x = 1
+        msg = Marker(
+            id=counter,
+            header=hdr,
+            ns=limb,
+            type=Marker.CYLINDER,
+            scale=Vector3(0.009, 0.009, 0.11),
+            color=ColorRGBA(0, 0, 0.5, 0.8),
+            pose=Pose(
+                Point(0, -0.025, -0.055),
+                Quaternion(1, 0, 0, 0)
+            )
+        )
         self.pub.publish(msg)
-        msg.id += 1
+
+        counter += 1
+        msg.id = counter
         msg.pose.position.y = +0.025
         self.pub.publish(msg)
 
-        msg.type = Marker.MESH_RESOURCE
-        msg.id += 1
-        msg.scale.x = 1
-        msg.scale.y = 1
-        msg.scale.z = 1
-        msg.pose.position.x = -0.04
-        msg.pose.position.y = 0
-        msg.pose.position.z = -0.01
-
-        msg.lifetime = rospy.Duration()
-        msg.pose.orientation.x = 0
-        msg.pose.orientation.y = 0
-        msg.pose.orientation.z = 0
-        msg.pose.orientation.w = 1
-        msg.color.r = 0.2
-        msg.color.g = 0.2
-        msg.color.b = 0.2
-        msg.color.a = 0.5
-        msg.mesh_resource = 'package://baxter_hydra_teleop/meshes/hydra.stl'
+        counter += 1
+        msg = Marker(
+            id=counter,
+            header=hdr,
+            ns=limb,
+            type=Marker.MESH_RESOURCE,
+            mesh_resource='package://baxter_hydra_teleop/meshes/hydra.stl',
+            scale=Vector3(1, 1, 1),
+            color=ColorRGBA(0.2, 0.2, 0.2, 0.5),
+            pose=Pose(
+                Point(-0.04, 0, -0.01),
+                Quaternion(0, 0, 0, 1)
+            )
+        )
         self.pub.publish(msg)
