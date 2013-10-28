@@ -250,7 +250,7 @@ class Teleop(object):
                 self.happy_count = 0
                 _status_display.set_image('confused')
 
-            happy0 = self.mover_head.parse_joy(msg.paddles[0])
+            self.mover_head.parse_joy(msg.paddles[0])
             self.gripper_left.set_position(
                 100 * (1 - msg.paddles[0].trigger))
             self.gripper_right.set_position(
