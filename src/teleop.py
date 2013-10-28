@@ -129,8 +129,8 @@ class LimbMover(object):
         time_since_req = rospy.Time.now() - self.last_solve_request_time
         return time_since_req > rospy.Duration(0.05)  # 20 Hz
 
-    def update(self, trigger):
-        self.vis.show_gripper(self.limb)
+    def update(self, trigger, gripper_travel):
+        self.vis.show_gripper(self.limb, gripper_travel, 0.026, 0.11, 1)
 
         # Throttle service requests
         if trigger and self._solver_cooled_down():
@@ -251,17 +251,19 @@ class Teleop(object):
 
         self._terminate_if_pressed(msg)
 
-        self.mover_left.update(False)
-        self.mover_right.update(False)
+        self.mover_left.update(False, msg.paddles[0].trigger)
+        self.mover_right.update(False, msg.paddles[1].trigger)
 
         if not self.enabled:
             self.enabled = (
                 msg.paddles[0].buttons[0] or msg.paddles[1].buttons[0])
             return
-        if not rospy.is_shutdown():
 
-            happy0 = self.mover_left.update(msg.paddles[0].buttons[0])
-            happy1 = self.mover_right.update(msg.paddles[1].buttons[0])
+        if not rospy.is_shutdown():
+            happy0 = self.mover_left.update(
+                msg.paddles[0].buttons[0], msg.paddles[0].trigger)
+            happy1 = self.mover_right.update(
+                msg.paddles[1].buttons[0], msg.paddles[1].trigger)
             if happy0 and happy1:
                 self.happy_count += 1
                 if self.happy_count > 200:

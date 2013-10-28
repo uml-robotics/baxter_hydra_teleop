@@ -20,7 +20,8 @@ class Vis(object):
             '/visualization_marker', Marker)
         self.last_time = rospy.Time.now()
 
-    def show_gripper(self, limb):
+    def show_gripper(self, limb, travel, width=0.026, height=0.11, position=1):
+    #def show_gripper(self, limb):
         # Throttle
         if (rospy.Time.now() - self.last_time) < rospy.Duration(0.05):
             return
@@ -31,16 +32,21 @@ class Vis(object):
         hdr = Header(
             stamp=rospy.Time.now(), frame_id='hydra_' + limb + '_grab')
 
+        spacing = 0.075 / 8  # Gripper attachment spacing
+        max_gripper_travel = 0.022
+        gripper_offset = (
+            width + spacing * (position - 1) - max_gripper_travel * travel)
+
         # Gripper projection
         msg = Marker(
             id=counter,
             header=hdr,
             ns=limb,
-            type=Marker.CYLINDER,
-            scale=Vector3(0.009, 0.009, 0.11),
-            color=ColorRGBA(0, 0, 0.5, 0.8),
+            type=Marker.CUBE,
+            scale=Vector3(0.009, 0.009, height),
+            color=ColorRGBA(0, 0, 0.1, 0.8),
             pose=Pose(
-                Point(0, -0.025, -0.055),
+                Point(0, -gripper_offset, -0.055),
                 Quaternion(1, 0, 0, 0)
             )
         )
@@ -48,7 +54,7 @@ class Vis(object):
 
         counter += 1
         msg.id = counter
-        msg.pose.position.y = +0.025
+        msg.pose.position.y = +gripper_offset
         self.pub.publish(msg)
 
         counter += 1
