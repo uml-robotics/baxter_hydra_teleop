@@ -203,14 +203,9 @@ class Teleop(object):
           "Press left or right button on Hydra to start the teleop")
         while not self.enabled and not rospy.is_shutdown():
             rospy.Rate(10).sleep()
-            pass
-        rospy.loginfo("Enabling robot... ")
-        self.rs.enable()
-        rospy.Timer(rospy.Duration(0.1), self._reset_grippers, oneshot=True)
         self.mover_left.enable()
         self.mover_right.enable()
         self.mover_head.set_pose()
-        _status_display.set_image('happy')
 
     def _reset_grippers(self, event):
         rospy.loginfo('Resetting grippers')
@@ -218,6 +213,12 @@ class Teleop(object):
         self.gripper_right.reboot()
         self.gripper_left.calibrate()
         self.gripper_right.calibrate()
+
+    def _enable(self):
+        rospy.loginfo("Enabling robot... ")
+        self.rs.enable()
+        rospy.Timer(rospy.Duration(0.1), self._reset_grippers, oneshot=True)
+        _status_display.set_image('happy')
 
     def _hydra_cb(self, msg):
         with self.hydra_msg_lock:
