@@ -261,10 +261,10 @@ class Teleop(object):
             self._cleanup()
 
     def _cleanup(self):
-        self.mover_left.stop_thread()
-        self.mover_right.stop_thread()
         rospy.loginfo("Disabling robot... ")
         self.rs.disable()
+        self.mover_left.stop_thread()
+        self.mover_right.stop_thread()
 
 
 if __name__ == '__main__':
