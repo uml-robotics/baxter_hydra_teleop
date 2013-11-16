@@ -224,6 +224,13 @@ class Teleop(object):
             self.hydra_msg = msg
 
     def _main_loop(self, event):
+        if self.rs.state().estop_button == 1:
+            _status_display.set_image('dead')
+            return
+        else:
+            if not self.rs.state().enabled:
+                _status_display.set_image('indifferent')
+
         with self.hydra_msg_lock:
             msg = self.hydra_msg
 
