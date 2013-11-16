@@ -177,7 +177,6 @@ class IKSolver(object):
 class Teleop(object):
 
     hydra_msg_lock = threading.Lock()
-    enabled = False  # We wait until the user presses a button
 
     def __init__(self):
         global _status_display
@@ -201,7 +200,7 @@ class Teleop(object):
 
         rospy.loginfo(
           "Press left or right button on Hydra to start the teleop")
-        while not self.enabled and not rospy.is_shutdown():
+        while not self.rs.state().enabled and not rospy.is_shutdown():
             rospy.Rate(10).sleep()
         self.mover_left.enable()
         self.mover_right.enable()
@@ -233,9 +232,9 @@ class Teleop(object):
         self.mover_left.update(False, msg.paddles[0].trigger)
         self.mover_right.update(False, msg.paddles[1].trigger)
 
-        if not self.enabled:
-            self.enabled = (
-                msg.paddles[0].buttons[0] or msg.paddles[1].buttons[0])
+        if not self.rs.state().enabled:
+            if msg.paddles[0].buttons[0] or msg.paddles[1].buttons[0]:
+                self._enable()
             return
 
         if not rospy.is_shutdown():
