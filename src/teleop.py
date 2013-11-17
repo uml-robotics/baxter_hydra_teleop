@@ -206,12 +206,19 @@ class Teleop(object):
         self.mover_right.enable()
         self.mover_head.set_pose()
 
+    def _reset_gripper(self, gripper):
+        gripper.reboot()
+        gripper.set_force(10)
+        gripper.set_holding_force(20)
+        gripper.set_dead_band(5)
+        if not gripper.ready():
+            gripper.calibrate()
+        gripper.set_position(0)
+
     def _reset_grippers(self, event):
         rospy.loginfo('Resetting grippers')
-        self.gripper_left.reboot()
-        self.gripper_right.reboot()
-        self.gripper_left.calibrate()
-        self.gripper_right.calibrate()
+        self._reset_gripper(self.gripper_right)
+        self._reset_gripper(self.gripper_left)
 
     def _enable(self):
         rospy.loginfo("Enabling robot... ")
