@@ -243,8 +243,8 @@ class Teleop(object):
 
         self._terminate_if_pressed(msg)
 
-        self.mover_left.update(False, msg.paddles[0].trigger)
-        self.mover_right.update(False, msg.paddles[1].trigger)
+        self.mover_left.update(False, 1 - self.gripper_left.position() / 100)
+        self.mover_right.update(False, 1 - self.gripper_right.position() / 100)
 
         if not self.rs.state().enabled:
             if msg.paddles[0].buttons[0] or msg.paddles[1].buttons[0]:
@@ -253,9 +253,11 @@ class Teleop(object):
 
         if not rospy.is_shutdown():
             happy0 = self.mover_left.update(
-                msg.paddles[0].buttons[0], msg.paddles[0].trigger)
+                msg.paddles[0].buttons[0],
+                1 - self.gripper_left.position() / 100)
             happy1 = self.mover_right.update(
-                msg.paddles[1].buttons[0], msg.paddles[1].trigger)
+                msg.paddles[1].buttons[0],
+                1 - self.gripper_right.position() / 100)
             if happy0 and happy1:
                 self.happy_count += 1
                 if self.happy_count > 200:
