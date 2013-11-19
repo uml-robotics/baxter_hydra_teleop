@@ -39,6 +39,7 @@ import threading
 import roslib
 roslib.load_manifest('baxter_hydra_teleop')
 import rospy
+import tf
 
 from razer_hydra.msg import Hydra
 
@@ -85,6 +86,7 @@ class LimbMover(object):
         self.running = True
         self.thread = threading.Thread(target=self._update_thread)
         self.vis = vis.Vis()
+        self.goal_transform = GoalTransform(limb)
 
     def enable(self):
         self.thread.start()
@@ -101,6 +103,7 @@ class LimbMover(object):
 
     def update(self, trigger, gripper_travel):
         self.vis.show_gripper(self.limb, gripper_travel, 0.026, 0.11, 1)
+        self.goal_transform.update()
 
         # Throttle service requests
         if trigger and self._solver_cooled_down():
@@ -148,7 +151,7 @@ class IKSolver(object):
     def solve(self):
         ikreq = SolvePositionIKRequest()
         hdr = Header(
-            stamp=rospy.Time.now(), frame_id='hydra_' + self.limb + '_grab')
+            stamp=rospy.Time.now(), frame_id=self.limb + '_gripper_goal')
         pose = PoseStamped(
             header=hdr,
             pose=Pose(
@@ -172,6 +175,81 @@ class IKSolver(object):
         else:
             rospy.logwarn("INVALID POSE for %s" % self.limb)
             return False
+
+
+class GoalTransform(object):
+    """ Publish an additional transforms constrained in some way.
+
+    Should allow to make it easier to add teleoperation constraints,
+    e.g. lock the control plane, or change motion scaling.
+    """
+
+    def __init__(self, limb):
+        self.modes = {
+                      "identity": self._identity,
+                      "orientation": self._orientation_lock,
+                      "plane": self._plane_lock
+                      }
+        self.set_mode("identity")
+        self.br = tf.TransformBroadcaster()
+        self.plane = Transform()
+        self.plane.rotation.w = 1
+        self.limb = limb
+        self.orientation = Quaternion(0, 0, 0, 1)
+        self.orientation_lock_frame = "base"
+        self.tf_listener = tf.TransformListener()
+        """
+        _tf_offset is used to add an offset to the stamp of published
+        transforms. It is a hack needed to IK nodes on Baxter happy, and
+        would be different for different systems.
+        """
+        self._tf_offset = 0.1
+
+        self.plane = Pose()
+
+    def set_mode(self, mode):
+        self.updater = self.modes[mode]
+
+    def update(self):
+        self.updater()
+
+    def _identity(self):
+        """ No tranformation, 1 to 1 mapping """
+        self.br.sendTransform(
+           (0, 0, 0),
+           (0, 0, 0, 1),
+           rospy.Time.now() + rospy.Duration(self._tf_offset),
+            self.limb + "_gripper_goal",
+           "hydra_" + self.limb + "_grab")
+
+    def _orientation_lock(self):
+        """ Lock the orientation """
+        try:
+            (trans, rot) = self.tf_listener.lookupTransform(
+                   self.orientation_lock_frame,
+                   'hydra_' + self.limb + '_grab',
+                   rospy.Time(0))
+        except (tf.LookupException,
+                tf.ConnectivityException,
+                tf.ExtrapolationException) as e:
+            print e
+            return
+
+        self.br.sendTransform(
+           trans,
+           (
+            self.orientation.x,
+            self.orientation.y,
+            self.orientation.z,
+            self.orientation.w,
+           ),
+           rospy.Time.now() + rospy.Duration(self._tf_offset),
+           self.limb + "_gripper_goal",
+           self.orientation_lock_frame)
+
+    def _plane_lock(self):
+        """ Lock the orientation """
+        pass
 
 
 class Teleop(object):
