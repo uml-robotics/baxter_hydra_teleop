@@ -57,7 +57,7 @@ import baxter_interface
 
 import baxter_faces
 
-import vis
+from baxter_hydra_teleop import vis
 
 
 class HeadMover(object):
