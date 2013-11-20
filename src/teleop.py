@@ -254,14 +254,13 @@ class GoalTransform(object):
 
 class Teleop(object):
 
-    hydra_msg_lock = threading.Lock()
-
     def __init__(self):
-        global _status_display
         rospy.init_node("baxter_hydra_teleop")
-        _status_display = baxter_faces.FaceImage()
+        self.status_display = baxter_faces.FaceImage()
         rospy.loginfo("Getting robot state... ")
         self.rs = baxter_interface.RobotEnable()
+        self.hydra_msg = Hydra()
+        self.hydra_msg_lock = threading.Lock()
 
         self.gripper_left = baxter_interface.Gripper("left")
         self.gripper_right = baxter_interface.Gripper("right")
@@ -302,7 +301,7 @@ class Teleop(object):
         rospy.loginfo("Enabling robot... ")
         self.rs.enable()
         rospy.Timer(rospy.Duration(0.1), self._reset_grippers, oneshot=True)
-        _status_display.set_image('happy')
+        self.status_display.set_image('happy')
 
     def _hydra_cb(self, msg):
         with self.hydra_msg_lock:
@@ -310,11 +309,11 @@ class Teleop(object):
 
     def _main_loop(self, event):
         if self.rs.state().estop_button == 1:
-            _status_display.set_image('dead')
+            self.status_display.set_image('dead')
             return
         else:
             if not self.rs.state().enabled:
-                _status_display.set_image('indifferent')
+                self.status_display.set_image('indifferent')
 
         with self.hydra_msg_lock:
             msg = self.hydra_msg
@@ -339,10 +338,10 @@ class Teleop(object):
             if happy0 and happy1:
                 self.happy_count += 1
                 if self.happy_count > 200:
-                    _status_display.set_image('happy')
+                    self.status_display.set_image('happy')
             else:
                 self.happy_count = 0
-                _status_display.set_image('confused')
+                self.status_display.set_image('confused')
 
             self.mover_head.parse_joy(msg.paddles[0])
             self.gripper_left.set_position(
