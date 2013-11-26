@@ -3,9 +3,9 @@ Baxter Hydra Teleop
 
 Control Baxter's arms with Razer Hydra controllers.
 
-Tested in Ros Hydro
+Tested in Ros Hydro with Baxter SDK 0.6.2.
 
-Quick Sart (Hydro)
+Quick Start (Hydro)
 ------------------
 
 ```  
