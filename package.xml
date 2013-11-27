@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package>
+  <name>baxter_hydra_teleop</name>
+  <version>0.1.0</version>
+  <description>Teleoperate Baxter robot hands using Razer Hydra controller.</description>
+
+  <maintainer email="mmedvede@cs.uml.edu">Mikhail Medvedev</maintainer>
+  <license>BSD</license>
+  <!-- <url type="website">http://ros.org/wiki/baxter_hydra_teleop</url> -->
+  <author email="mmedvede@cs.uml.edu">Mikhail Medvedev</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <run_depend>baxter_core_msgs</run_depend>
+  <run_depend>baxter_faces</run_depend>
+  <run_depend>baxter_interface</run_depend>
+  <run_depend>razer_hydra</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>visualization_msgs</run_depend>
+
+</package>
