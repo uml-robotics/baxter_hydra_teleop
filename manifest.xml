@@ -9,9 +9,8 @@
   <url>http://ros.org/wiki/baxter_hydra_teleop</url>
   <depend package="rospy"/>
   <depend package="razer_hydra"/>
-  <depend package="baxter_msgs"/>
+  <depend package="baxter_core_msgs"/>
   <depend package="baxter_interface"/>
-  <depend package="utilities"/>
   <depend package="baxter_faces"/>
   <depend package="visualization_msgs"/>
 

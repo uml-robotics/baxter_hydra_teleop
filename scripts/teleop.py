@@ -78,13 +78,14 @@ class Teleop(object):
         self.mover_head.set_pose()
 
     def _reset_gripper(self, gripper):
+        rospy.loginfo("Resetting %s" % gripper.name)
         gripper.reboot()
-        gripper.set_force(10)
+        gripper.set_moving_force(10)
         gripper.set_holding_force(20)
         gripper.set_dead_band(5)
-        if not gripper.ready():
+        if not gripper.calibrated():
             gripper.calibrate()
-        gripper.set_position(0)
+        gripper.command_position(100)
 
     def _reset_grippers(self, event):
         rospy.loginfo('Resetting grippers')
@@ -138,9 +139,9 @@ class Teleop(object):
                 self.status_display.set_image('confused')
 
             self.mover_head.parse_joy(msg.paddles[0])
-            self.gripper_left.set_position(
+            self.gripper_left.command_position(
                 100 * (1 - msg.paddles[0].trigger))
-            self.gripper_right.set_position(
+            self.gripper_right.command_position(
                 100 * (1 - msg.paddles[1].trigger))
 
     def _terminate_if_pressed(self, hydra):

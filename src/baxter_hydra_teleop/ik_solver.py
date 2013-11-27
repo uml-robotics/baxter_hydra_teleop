@@ -38,14 +38,14 @@ from geometry_msgs.msg import (
     Quaternion,
 )
 from std_msgs.msg import Header
-from baxter_msgs.srv import SolvePositionIK
-from baxter_msgs.srv import SolvePositionIKRequest
+from baxter_core_msgs.srv import SolvePositionIK
+from baxter_core_msgs.srv import SolvePositionIKRequest
 
 
 class IKSolver(object):
     def __init__(self, limb):
         self.limb = limb
-        ns = "/sdk/robot/limb/" + self.limb + "/solve_ik_position"
+        ns = "ExternalTools/" + limb + "/PositionKinematicsNode/IKService"
         rospy.wait_for_service(ns)
         self.iksvc = rospy.ServiceProxy(ns, SolvePositionIK)
         self.solution = dict()
@@ -85,7 +85,7 @@ class IKSolver(object):
 
         if (resp.isValid[0]):
             self.solution = dict(
-                zip(resp.joints[0].names, resp.joints[0].angles))
+                zip(resp.joints[0].name, resp.joints[0].position))
             rospy.loginfo("Solution Found, %s" % self.limb, self.solution)
             return True
 
