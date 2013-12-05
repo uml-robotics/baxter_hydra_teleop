@@ -47,7 +47,7 @@ class LimbMover(object):
         self.last_solve_request_time = rospy.Time.now()
         self.running = True
         self.thread = threading.Thread(target=self._update_thread)
-        self.vis = Vis()
+        self.vis = Vis(limb)
         self.goal_transform = GoalTransform(limb)
 
     def enable(self):
@@ -64,7 +64,7 @@ class LimbMover(object):
         return time_since_req > rospy.Duration(0.05)  # 20 Hz
 
     def update(self, trigger, gripper_travel):
-        self.vis.show_gripper(self.limb, gripper_travel, 0.026, 0.11, 1)
+        self.vis.show_gripper(gripper_travel)
         self.goal_transform.update()
 
         # Throttle service requests
