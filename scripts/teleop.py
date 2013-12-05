@@ -145,7 +145,7 @@ class Teleop(object):
                 100 * (1 - msg.paddles[1].trigger))
 
     def _terminate_if_pressed(self, hydra):
-        if(sum(hydra.paddles[0].buttons[1:] + hydra.paddles[1].buttons[1:])):
+        if(hydra.paddles[0].buttons[5] or hydra.paddles[1].buttons[5]):
             self._cleanup()
 
     def _cleanup(self):
