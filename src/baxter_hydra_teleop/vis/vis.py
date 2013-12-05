@@ -45,11 +45,16 @@ class HydraVis(VisMarker):
 
 
 class GripperVis(VisMarker):
-    def __init__(self, limb,
+    def __init__(self, limb, attached_to_hydra=True,
                  width=0.026, height=0.11, position=1):
-        frame = 'hydra_' + limb + '_grab'
-        color = ColorRGBA(0.1, 0.1, 0.1, 0.4)
-        pos = Point(0, 0, -0.055)
+        if attached_to_hydra:
+            frame = 'hydra_' + limb + '_grab'
+            color = ColorRGBA(0.1, 0.1, 0.1, 0.4)
+            pos = Point(0, 0, -0.055)
+        else:
+            frame = limb + '_gripper'
+            color = ColorRGBA(0, 0, 0.1, 0.8)
+            pos = Point(0, 0, 0.04)
         hdr = Header(frame_id=frame)
 
         self.width = width
@@ -91,7 +96,8 @@ class Vis(object):
             '/visualization_marker', Marker)
         self.last_time = rospy.Time.now()
         self.hydra = HydraVis(limb)
-        self.gripper = GripperVis(limb)
+        self.gripper = GripperVis(limb, False)
+        self.gripper_hydra = GripperVis(limb)
 
     def show_gripper(self, travel):
         # Throttle
@@ -101,3 +107,4 @@ class Vis(object):
 
         self.hydra.publish(self.pub)
         self.gripper.publish(self.pub, travel)
+        self.gripper_hydra.publish(self.pub, travel)
