@@ -40,7 +40,8 @@ class HydraVis(VisMarker):
             pose=Pose(
                 Point(-0.04, 0, -0.01),
                 Quaternion(0, 0, 0, 1)
-            )
+            ),
+            frame_locked=True
         )
 
 
@@ -75,7 +76,8 @@ class GripperVis(VisMarker):
             pose=Pose(
                 pos,
                 Quaternion(1, 0, 0, 0)
-            )
+            ),
+            frame_locked=True
         )
 
     def publish(self, publisher, travel=1):
