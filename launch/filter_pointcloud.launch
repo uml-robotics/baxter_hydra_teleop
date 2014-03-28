@@ -1,0 +1,41 @@
+<launch>
+
+  <node pkg="nodelet" type="nodelet" name="pcl_manager1" args="manager" output="screen" />
+
+  <!-- Run a Voxel Grid filter -->
+  <node pkg="nodelet" type="nodelet" name="voxel_grid1" args="load pcl/VoxelGrid pcl_manager" output="screen">
+    <remap from="~input" to="/camera/depth_registered/points" />
+    <rosparam>
+      filter_field_name: z
+      filter_limit_min: 0.0
+      filter_limit_max: 1.5
+      filter_limit_negative: False
+      leaf_size: 0.007
+    </rosparam>
+  </node>
+
+  <!-- Run a Plane Segmentation filter to remove the plane -->
+  <!--<node pkg="nodelet" type="nodelet" name="sac_plane0" args="load pcl/SACSegmentation pcl_manager" output="screen">-->
+    <!--<remap from="~input" to="/voxel_grid/output" />-->
+    <!--<rosparam>-->
+      <!--model_type: 0-->
+      <!--distance_threshold: 0.01-->
+      <!--radius_max: 0.15-->
+      <!--radius_min: 0.00-->
+      <!--probability: 0.8-->
+      <!--optimize_coefficients: true-->
+      <!--max_iterations: 50000-->
+      <!--min_inliers: 10-->
+    <!--</rosparam>-->
+  <!--</node>-->
+
+  <!-- Then Extract the Outlier Points -->
+  <!--<node pkg="nodelet" type="nodelet" name="extract_plane_outliers0" args="load pcl/ExtractIndices pcl_manager" output=  "screen">-->
+    <!--<remap from="~input" to="/voxel_grid/output" />-->
+    <!--<remap from="/extract_plane_outliers0/indices" to="/sac_plane0/inliers" />-->
+    <!--<rosparam>-->
+      <!--negative: true-->
+    <!--</rosparam>-->
+  <!--</node>-->
+
+</launch>
