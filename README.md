@@ -5,6 +5,8 @@ Control Baxter's arms with Razer Hydra controllers.
 
 Tested in Ros Hydro with Baxter SDK 0.7.0.
 
+Video: https://www.youtube.com/watch?v=duClzR2592o
+
 Quick Start (Hydro)
 ------------------
 
