@@ -45,6 +45,7 @@ import baxter_faces
 from baxter_hydra_teleop.head_mover import HeadMover
 from baxter_hydra_teleop.limb_mover import LimbMover
 
+from baxter_interface import CHECK_VERSION
 
 class Teleop(object):
 
@@ -52,7 +53,7 @@ class Teleop(object):
         rospy.init_node("baxter_hydra_teleop")
         self.status_display = baxter_faces.FaceImage()
         rospy.loginfo("Getting robot state... ")
-        self.rs = baxter_interface.RobotEnable()
+        self.rs = baxter_interface.RobotEnable(CHECK_VERSION)
         self.hydra_msg = Hydra()
         self.hydra_msg_lock = threading.Lock()
 
