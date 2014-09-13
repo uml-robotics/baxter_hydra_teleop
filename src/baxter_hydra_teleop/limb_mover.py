@@ -43,6 +43,7 @@ class LimbMover(object):
     def __init__(self, limb):
         self.limb = limb
         self.interface = baxter_interface.Limb(limb)
+        self.interface.set_joint_position_speed(0.5)
         self.solver = IKSolver(limb)
         self.last_solve_request_time = rospy.Time.now()
         self.running = True
