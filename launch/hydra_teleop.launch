@@ -31,6 +31,14 @@
 
   <include file="$(find baxter_hydra_teleop)/launch/tf.launch"/>
 
+  <include file="$(find baxter_hydra_teleop)/launch/kinect_tf.launch"/>
+
+  <include file="$(find openni_launch)/launch/openni.launch" >
+    <arg name="depth_registration" value="true" />
+  </include>
+
+  <include file="$(find baxter_hydra_teleop)/launch/filter_pointcloud.launch" />
+
   <node pkg="baxter_hydra_teleop" type="teleop.py" name="baxter_hydra_teleop" output="screen" respawn="true"/>
 
   <node name="rviz" pkg="rviz" type="rviz" output="screen" args="--display-config $(find baxter_hydra_teleop)/rviz/teleop.rviz" />
