@@ -125,12 +125,15 @@ class Teleop(object):
             return
 
         if not rospy.is_shutdown():
-            happy0 = self.mover_left.update(
-                msg.paddles[0].buttons[0],
-                1 - self.gripper_left.position() / 100)
-            happy1 = self.mover_right.update(
-                msg.paddles[1].buttons[0],
-                1 - self.gripper_right.position() / 100)
+            try:
+                happy0 = self.mover_left.update(
+                    msg.paddles[0].buttons[0],
+                    1 - self.gripper_left.position() / 100)
+                happy1 = self.mover_right.update(
+                    msg.paddles[1].buttons[0],
+                    1 - self.gripper_right.position() / 100)
+            except:
+                rospy.logerr("Gripper service appears to be null!")
             if happy0 and happy1:
                 self.happy_count += 1
                 if self.happy_count > 200:
