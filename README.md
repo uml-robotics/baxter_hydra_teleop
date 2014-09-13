@@ -24,7 +24,7 @@ git clone https://github.com/uml-robotics/baxter_hydra_teleop.git
 git clone https://github.com/uml-robotics/baxter_faces
 ```
 
-You should be able to
+We have a run all launch file prepared. This will start the oculus, razer hydra, kinect and all of the necessary transforms.
 ```
 roslaunch baxter_hydra_teleop hydra_teleop.launch
 ```
