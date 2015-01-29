@@ -144,9 +144,9 @@ class Teleop(object):
 
             self.mover_head.parse_joy(msg.paddles[0])
             self.gripper_left.command_position(
-                100 * (1 - msg.paddles[0].trigger))
+                100 * (1 - 2*msg.paddles[0].trigger))
             self.gripper_right.command_position(
-                100 * (1 - msg.paddles[1].trigger))
+                100 * (1 - 2*msg.paddles[1].trigger))
 
     def _terminate_if_pressed(self, hydra):
         if(hydra.paddles[0].buttons[5] or hydra.paddles[1].buttons[5]):
