@@ -1,5 +1,6 @@
 <launch>
   <arg name="enable_hydra" default="true" />
+  <arg name="enable_kinect" default="true" />
 
   <!--Razer Hydra -->
   <group if="$(arg enable_hydra)">
@@ -28,20 +29,25 @@
       <param name="grab_z"  type="double" value="$(arg gz)" />
       <param name="use_grab_frame"  type="bool" value="$(arg use_grab_frame)" />
     </node>
+
+    <node name="rviz" pkg="rviz" type="rviz" output="screen" args="--display-config $(find baxter_hydra_teleop)/rviz/teleop.rviz" />
+
+    <node pkg="baxter_hydra_teleop" type="teleop.py" name="baxter_hydra_teleop" output="screen" respawn="true"/>
+
+    <include file="$(find baxter_hydra_teleop)/launch/tf.launch"/>
+
   </group>
 
-  <include file="$(find baxter_hydra_teleop)/launch/tf.launch"/>
+  <group if="$(arg enable_kinect)">
 
-  <include file="$(find baxter_hydra_teleop)/launch/kinect_tf.launch"/>
+    <include file="$(find baxter_hydra_teleop)/launch/kinect_tf.launch"/>
 
-  <include file="$(find openni_launch)/launch/openni.launch" >
-    <arg name="depth_registration" value="true" />
-  </include>
+    <include file="$(find openni_launch)/launch/openni.launch" >
+      <arg name="depth_registration" value="true" />
+    </include>
 
-  <include file="$(find baxter_hydra_teleop)/launch/filter_pointcloud.launch" />
+    <include file="$(find baxter_hydra_teleop)/launch/filter_pointcloud.launch" />
 
-  <node pkg="baxter_hydra_teleop" type="teleop.py" name="baxter_hydra_teleop" output="screen" respawn="true"/>
-
-  <node name="rviz" pkg="rviz" type="rviz" output="screen" args="--display-config $(find baxter_hydra_teleop)/rviz/teleop.rviz" />
+  </group>
 
 </launch>
