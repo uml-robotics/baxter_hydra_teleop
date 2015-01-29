@@ -48,6 +48,10 @@
 
     <include file="$(find baxter_hydra_teleop)/launch/filter_pointcloud.launch" />
 
+    <group unless="$(arg enable_hydra)">
+      <node name="rviz" pkg="rviz" type="rviz" output="screen" args="--display-config $(find baxter_hydra_teleop)/rviz/kinect_only.rviz" />
+    </group>
+
   </group>
 
 </launch>
