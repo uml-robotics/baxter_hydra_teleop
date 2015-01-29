@@ -7,6 +7,11 @@
     <node name="rviz" pkg="rviz" type="rviz" output="screen" args="--display-config $(find baxter_hydra_teleop)/rviz/teleop.rviz" />
   </group>
 
+  <group unless="$(arg enable_rift)">
+    <node name="rviz2" pkg="rviz" type="rviz" output="screen" args="--display-config $(find baxter_hydra_teleop)/rviz/kinect_only.rviz" />
+  </group>
+
+
   <!--Razer Hydra -->
   <group if="$(arg enable_hydra)">
     <arg name="device" default="/dev/hydra" />
@@ -35,7 +40,7 @@
       <param name="use_grab_frame"  type="bool" value="$(arg use_grab_frame)" />
     </node>
 
-    <node pkg="baxter_hydra_teleop" type="teleop.py" name="baxter_hydra_teleop" output="screen" respawn="true"/>
+    <node pkg="baxter_hydra_teleop" type="teleop.py" name="baxter_hydra_teleop" output="screen" />
 
     <include file="$(find baxter_hydra_teleop)/launch/tf.launch"/>
 
@@ -51,9 +56,6 @@
 
     <include file="$(find baxter_hydra_teleop)/launch/filter_pointcloud.launch" />
 
-    <group unless="$(arg enable_hydra)">
-      <node name="rviz" pkg="rviz" type="rviz" output="screen" args="--display-config $(find baxter_hydra_teleop)/rviz/kinect_only.rviz" />
-    </group>
 
   </group>
 
