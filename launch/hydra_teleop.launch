@@ -1,7 +1,8 @@
 <launch>
+  <arg name="enable_hydra" default="true" />
 
   <!--Razer Hydra -->
-  <group>
+  <group if="$(arg enable_hydra)">
     <arg name="device" default="/dev/hydra" />
     <arg name="publish_tf" default="true" />
     <arg name="polling_ms" default="10" />
