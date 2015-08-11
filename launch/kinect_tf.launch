@@ -1,4 +1,0 @@
-<launch>
-  <node name="kinect_tf0" pkg="tf" type="static_transform_publisher" args="0 0.1 0.03 0 0.68 0  /camera_rot /camera_link 50"/>
-  <node name="kinect_tf1" pkg="tf" type="static_transform_publisher" args="-0.04 0.1 0 -1 -1 -1 1 /screen /camera_rot 50"/>
-</launch>
