@@ -1,0 +1,61 @@
+#!/bin/bash
+set -e
+spawn()
+{
+  $@ 1>&2 &
+  echo $!
+  echo "$@ ==> $!" 1>&2
+}
+ordietrying()
+{
+  perl -e 'alarm shift; exec @ARGV' "$@"
+}
+
+# start a few things backgrounded and concat their PIDs
+PIDS=""
+for x in "roslaunch openni_launch openni.launch" \
+"roslaunch baxter_hydra_teleop kinect_tfs.launch" \
+"roslaunch baxter_hydra_teleop filter_pointcloud.launch"
+do
+  PIDS="$PIDS `spawn $x`"
+done
+
+# if we die, take them all with us
+trap "for p in $PIDS; do kill -9 \$p || true; done; set +x" EXIT
+
+# wait for the openni node's dynamic reconfigure to wake up
+
+ordietrying 10 bash -c "while ! rosrun dynamic_reconfigure dynparam list | grep -q '/driver'; do
+  echo \"Waiting for openni driver to start\" 1>&2
+  sleep 1
+done"
+
+#if the perl alarm stops execution early
+if [ $? -eq 142 ]; then
+  echo "IS OPENNI RUNNING SOMEWHERE?!" 1>&2
+  exit 142
+fi
+
+FQNN="`rosrun dynamic_reconfigure dynparam list | grep '/driver'`"
+
+while ! rosrun dynamic_reconfigure dynparam get $FQNN | grep -q depth_registration; do
+  echo "Waiting for depth_registration dynparam" 1>&2
+  sleep 1
+done
+
+echo "forcing depth registration on $FQNN" 1>&2
+rosrun dynamic_reconfigure dynparam set $FQNN depth_registration true
+
+echo "Now waiting for something to die..." 1>&2
+
+for p in $PIDS; do
+  while [ -d /proc/$p ] && rosnode list | grep -q $FQNN; do sleep 1; done
+done
+
+for p in $PIDS; do kill -9 $p >& /dev/null || true; done;
+
+echo "buhbye"
+
+set +e
+
+exit 0
