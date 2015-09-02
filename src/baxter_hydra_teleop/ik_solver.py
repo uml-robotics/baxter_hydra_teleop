@@ -78,12 +78,13 @@ class IKSolver(object):
         )
 
         ikreq.pose_stamp.append(pose)
+        resp=None
         try:
             resp = self.iksvc(ikreq)
         except rospy.ServiceException, e:
             rospy.loginfo("Service call failed: %s" % (e,))
 
-        if (resp.isValid[0]):
+        if (resp is not None and resp.isValid[0]):
             self.solution = dict(
                 zip(resp.joints[0].name, resp.joints[0].position))
             rospy.loginfo("Solution Found, %s" % self.limb, self.solution)
