@@ -116,8 +116,8 @@ class Teleop(object):
 
         self._terminate_if_pressed(msg)
 
-        self.mover_left.update(False, 1 - self.gripper_left.position() / 100)
-        self.mover_right.update(False, 1 - self.gripper_right.position() / 100)
+#        self.mover_left.update(False, 1 - self.gripper_left.position() / 100)
+#        self.mover_right.update(False, 1 - self.gripper_right.position() / 100)
 
         if not self.rs.state().enabled:
             if msg.paddles[0].buttons[0] or msg.paddles[1].buttons[0]:

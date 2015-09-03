@@ -50,6 +50,7 @@ class LimbMover(object):
         self.thread = threading.Thread(target=self._update_thread)
         self.vis = Vis(limb)
         self.goal_transform = GoalTransform(limb)
+        self._lock = threading.Lock()
 
     def enable(self):
         self.thread.start()
@@ -65,13 +66,15 @@ class LimbMover(object):
         return time_since_req > rospy.Duration(0.05)  # 20 Hz
 
     def update(self, trigger, gripper_travel):
+        
         self.vis.show_gripper(gripper_travel)
         self.goal_transform.update()
-
+        
         # Throttle service requests
         if trigger and self._solver_cooled_down():
             self._update_req_time()
-            return self.solver.solve()
+            with self._lock:            
+                return self.solver.solve()
         return True
 
     def stop_thread(self):
@@ -83,6 +86,7 @@ class LimbMover(object):
         rospy.loginfo("Starting Joint Update Thread: %s\n" % self.limb)
         rate = rospy.Rate(200)
         while not rospy.is_shutdown() and self.running:
-            self.interface.set_joint_positions(self.solver.solution)
+            with self._lock:
+                self.interface.set_joint_positions(self.solver.solution)
             rate.sleep()
         rospy.loginfo("Stopped %s" % self.limb)

@@ -40,7 +40,85 @@ from geometry_msgs.msg import (
 from std_msgs.msg import Header
 from baxter_core_msgs.srv import SolvePositionIK
 from baxter_core_msgs.srv import SolvePositionIKRequest
+import signal 
 
+import time
+import threading
+class ServiceTimeouter(object):
+    """ Ros services cannot be timed out. Occasionally the IK solver would take
+        up to 5 seconds to respond. This is a workaround class. """
+    def __init__(self, srv, param):
+        self.srv = srv
+        self.param = param
+        self.timeout = 0.5
+        self.retval = None
+        self.returned = False
+        self.lock = threading.Lock()
+        self.thread = threading.Thread(target=self._call_thread)
+    def _call_thread(self):
+        try:
+            self.retval = self.srv(self.param)
+            self.returned = True
+        except rospy.ServiceException, e:
+            rospy.loginfo("Service call failed: %s" % (e,))
+        except AttributeError:
+            rospy.loginfo("Socket.close() exception. Socket has become 'None'")
+    def call(self):
+        self.thread.start()
+        timeout = time.time() + self.timeout
+        while time.time() < timeout and self.thread.isAlive():
+            time.sleep(0.001)
+        if not self.returned:
+            print "timed out"
+            return None
+        return self.retval
+        
+
+#import subprocess, threading
+#
+#class Command(object):
+#    def __init__(self, cmd):
+#        self.cmd = cmd
+#        self.process = None
+#
+#    def run(self, timeout):
+#        def target():
+#            print 'Thread started'
+#            self.process = subprocess.Popen(self.cmd, shell=True)
+#            self.process.communicate()
+#            print 'Thread finished'
+#
+#        thread = threading.Thread(target=target)
+#        thread.start()
+#
+#        thread.join(timeout)
+#        if thread.is_alive():
+#            print 'Terminating process'
+#            self.process.terminate()
+#            thread.join()
+#        print self.process.returncode
+
+
+def timeout(func, args=(), kwargs={}, timeout_duration=1, default=None):
+#    import signal
+
+    class TimeoutError(Exception):
+        pass
+
+    def handler(signum, frame):
+        raise TimeoutError()
+
+    # set the timeout handler
+    signal.signal(signal.SIGALRM, handler) 
+    signal.alarm(timeout_duration)
+    try:
+        result = func(*args, **kwargs)
+    except TimeoutError as exc:
+        result = default
+    finally:
+        signal.alarm(0)
+
+    return result
 
 class IKSolver(object):
     def __init__(self, limb):
@@ -80,7 +158,8 @@ class IKSolver(object):
         ikreq.pose_stamp.append(pose)
         resp=None
         try:
-            resp = self.iksvc(ikreq)
+#            resp = self.iksvc(ikreq)
+            resp = ServiceTimeouter(self.iksvc, ikreq).call()
         except rospy.ServiceException, e:
             rospy.loginfo("Service call failed: %s" % (e,))
 
