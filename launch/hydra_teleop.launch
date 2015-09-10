@@ -1,6 +1,6 @@
 <launch>
   <arg name="enable_hydra" default="true" />
-  <arg name="enable_kinect" default="true" />
+  <arg name="enable_kinect" default="false" />
   <arg name="enable_rift" default="true" />
 
   <group if="$(arg enable_rift)" >
@@ -10,7 +10,6 @@
   <group unless="$(arg enable_rift)">
     <node name="rviz2" pkg="rviz" type="rviz" output="screen" args="--display-config $(find baxter_hydra_teleop)/rviz/kinect_only.rviz" />
   </group>
-
 
   <!--Razer Hydra -->
   <group if="$(arg enable_hydra)">
@@ -42,20 +41,11 @@
 
     <node pkg="baxter_hydra_teleop" type="teleop.py" name="baxter_hydra_teleop" output="screen" />
 
-    <include file="$(find baxter_hydra_teleop)/launch/tf.launch"/>
-
   </group>
 
   <group if="$(arg enable_kinect)">
 
-    <include file="$(find baxter_hydra_teleop)/launch/kinect_tf.launch"/>
-
-    <include file="$(find openni_launch)/launch/openni.launch" >
-      <arg name="depth_registration" value="true" />
-    </include>
-
-    <include file="$(find baxter_hydra_teleop)/launch/filter_pointcloud.launch" />
-
+    <node pkg="baxter_hydra_teleop" type="kinect_stuff" name="kinect_stuff" output="screen" />
 
   </group>
 
