@@ -21,7 +21,7 @@ do
 done
 
 # if we die, take them all with us
-trap "for p in $PIDS; do kill -9 \$p || true; done; set +x" EXIT
+trap "for p in $PIDS; do kill -9 \$p || true; done; set +x" EXIT KILL TERM SIGKILL SIGTERM
 
 # wait for the openni node's dynamic reconfigure to wake up
 
