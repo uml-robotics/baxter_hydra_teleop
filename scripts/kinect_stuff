@@ -1,43 +1,60 @@
 #!/bin/bash
 set -e
-spawn()
-{
-  $@ 1>&2 &
-  echo $!
-  echo "$@ ==> $!" 1>&2
-}
+
+MY_PID=$$
+PIDS=
+#################################################################################
+# helper functions
+#################################################################################
+
+# run with a timeout
 ordietrying()
 {
   perl -e 'alarm shift; exec @ARGV' "$@"
 }
 
-# start a few things backgrounded and concat their PIDs
-PIDS=""
-for x in "roslaunch openni_launch openni.launch" \
-"roslaunch baxter_hydra_teleop kinect_tfs.launch" \
-"roslaunch baxter_hydra_teleop filter_pointcloud.launch"
-do
-  PIDS="$PIDS `spawn $x`"
-done
+# should kill most things this script starts, and rosnode cleanup to get "residue"
+clean_up_shop() {
+  [ ! -z "$PIDS" ] && for x in $PIDS; do ordietrying 5 kill $x; done
+  pstree -p $MY_PID | tr "\n" " " | sed "s/[^0-9]/ /g" | sed "s/\s\s*/ /g" | sed "s/$MY_PID//g" | xargs --no-run-if-empty -n1 echo | sort -uh | xargs echo | xargs -n 1 -P 12 --no-run-if-empty -iXXX bash -c 'for x in 2 3 4 5 6 7 8 9; do kill -${x} XXX >& /dev/null; done' || true
+  yes | rosnode cleanup || true
+  return 0
+}
 
-# if we die, take them all with us
-trap "for p in $PIDS; do kill -9 \$p || true; done; set +x" EXIT KILL TERM SIGKILL SIGTERM
+# not rocket surgery.
+wait_for_topic() { while [ ! "$1" = "" ]; do while ! rostopic list | grep -q $1; do sleep 0.2; done; shift; done; }
 
-# wait for the openni node's dynamic reconfigure to wake up
+################################################################################
+# end helpers
+################################################################################
 
-ordietrying 10 bash -c "while ! rosrun dynamic_reconfigure dynparam list | grep -q '/driver'; do
-  echo \"Waiting for openni driver to start\" 1>&2
-  sleep 1
-done"
-
-#if the perl alarm stops execution early
-if [ $? -eq 142 ]; then
-  echo "IS OPENNI RUNNING SOMEWHERE?!" 1>&2
-  exit 142
+# if master isn't already up, give up now... multiple backgrounded roslaunches can race, starting multiple roscores
+if rosnode list 2>&1 | grep -q ERROR; then
+  echo "ERROR: Unable to communicate with master!" 1>&2
+  exit 11
 fi
 
+# Kill remaining listed PIDs and all other remaining children of this script when it dies
+trap "retval=$?; echo 'IT'\''S A TRAP'; clean_up_shop; exit $retval" exit SIGTERM SIGKILL TERM KILL
+
+# start a few things backgrounded, and wait for them to come up all the way
+roslaunch openni_launch openni.launch &
+PIDS="$!"
+roslaunch baxter_hydra_teleop kinect_tfs.launch &
+PIDS="$PIDS $!"
+roslaunch baxter_hydra_teleop filter_pointcloud.launch &
+PIDS="$PIDS $!"
+
+#  /voxel_grid1/output == the qualified name of our voxel_grid node's ~/output
+wait_for_topic /voxel_grid1/output
+
+#  .*/driver == hopefully the openni driver node
+wait_for_topic /driver/parameter_updates
+
+# find the name of the node we're seeking
 FQNN="`rosrun dynamic_reconfigure dynparam list | grep '/driver'`"
 
+# until it succeeds or we give up
 while ! rosrun dynamic_reconfigure dynparam get $FQNN | grep -q depth_registration; do
   echo "Waiting for depth_registration dynparam" 1>&2
   sleep 1
@@ -46,16 +63,21 @@ done
 echo "forcing depth registration on $FQNN" 1>&2
 rosrun dynamic_reconfigure dynparam set $FQNN depth_registration true
 
-echo "Now waiting for something to die..." 1>&2
+sleep 5 #just so the next echo is probably readable
 
-for p in $PIDS; do
-  while [ -d /proc/$p ] && rosnode list | grep -q $FQNN; do sleep 1; done
+echo "Press Q to exit..." 1>&2
+
+# a != q
+any_key='a'
+
+#purge any unhandled inputs
+read -n 1000 -t 0 dontcare || true
+
+#wait for Q
+while [ 1 ]; do
+  read -n 1 -t 0.1 any_key || true
+  [ "$any_key" == "q" -o "$any_key" == "Q" ] && break || true
 done
 
-for p in $PIDS; do kill -9 $p >& /dev/null || true; done;
-
-echo "buhbye"
-
 set +e
-
 exit 0
