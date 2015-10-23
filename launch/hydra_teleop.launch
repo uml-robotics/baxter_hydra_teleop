@@ -13,7 +13,8 @@
 
   <!--Razer Hydra -->
   <group if="$(arg enable_hydra)">
-    <include file="$(find baxter_hydra_teleop)/launch/tf.launch" />
+    <include file="$(find baxter_hydra_teleop)/launch/transforms.launch" />
+
     <arg name="device" default="/dev/hydra" />
     <arg name="publish_tf" default="true" />
     <arg name="polling_ms" default="10" />

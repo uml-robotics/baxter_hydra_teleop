@@ -1,4 +1,8 @@
 <launch>
+  <!-- offset between baxter base and position of hydra origin -->
+  <node pkg="tf" type="static_transform_publisher" name="tf_broadcaster_hydra_baxter" args="1.25 0 -0.15 0 0 0 1.0 /base /hydra_base 20"/>
+
+  <!-- kinect transform to baxter base -->
   <node name="kinect_checkers_tf0" pkg="tf" type="static_transform_publisher" args="0.04 0.06 0.007 0 1.05 0  /camera_rot /camera_link 50" />
   <node name="kinect_checkers_tf1" pkg="tf" type="static_transform_publisher" args="0.126 0 0.53 0 0 0  1 /base /camera_rot 50" />
 </launch>
