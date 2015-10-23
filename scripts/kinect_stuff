@@ -38,7 +38,7 @@ fi
 trap "retval=$?; echo 'IT'\''S A TRAP'; clean_up_shop; exit $retval" exit SIGTERM SIGKILL TERM KILL
 
 # start a few things backgrounded, and wait for them to come up all the way
-roslaunch openni_launch openni.launch &
+roslaunch openni2_launch openni2.launch &
 PIDS="$!"
 
 #  /voxel_grid1/output == the qualified name of our voxel_grid node's ~/output
