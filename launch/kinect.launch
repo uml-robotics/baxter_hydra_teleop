@@ -1,0 +1,24 @@
+<launch>
+  <arg name="enable_kinect" default="true" />
+
+  <group if="$(arg enable_kinect)">
+
+    <!-- starts openni2 launch file and then sets depth registration dynparam -->
+    <node pkg="baxter_hydra_teleop" type="kinect_stuff" name="kinect_stuff" output="screen" />
+
+    <!-- set nodelet manager used by the voxel grid nodelet to be the same one used by the kinect nodes -->
+    <arg name="manager" default="/camera/camera_nodelet_manager" />
+
+    <!-- Run a Voxel Grid filter -->
+    <node pkg="nodelet" type="nodelet" name="voxel_grid1" args="load pcl/VoxelGrid $(arg manager)" output="screen">
+      <remap from="~input" to="/camera/depth_registered/points" />
+      <rosparam>
+        filter_field_name: z
+        filter_limit_min: 0.0
+        filter_limit_max: 0.0 #1.5
+        filter_limit_negative: True #False
+        leaf_size: 0.007
+      </rosparam>
+    </node>
+  </group>
+</launch>

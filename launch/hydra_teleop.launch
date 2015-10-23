@@ -45,10 +45,8 @@
 
   </group>
 
-  <group if="$(arg enable_kinect)">
-
-    <node pkg="baxter_hydra_teleop" type="kinect_stuff" name="kinect_stuff" output="screen" />
-
-  </group>
+  <include file="$(find baxter_hydra_teleop)/launch/kinect.launch">
+    <arg name="enable_kinect" value="$(arg enable_kinect)" />
+  </include>
 
 </launch>

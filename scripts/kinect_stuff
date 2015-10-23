@@ -40,10 +40,6 @@ trap "retval=$?; echo 'IT'\''S A TRAP'; clean_up_shop; exit $retval" exit SIGTER
 # start a few things backgrounded, and wait for them to come up all the way
 roslaunch openni_launch openni.launch &
 PIDS="$!"
-roslaunch baxter_hydra_teleop kinect_tfs.launch &
-PIDS="$PIDS $!"
-roslaunch baxter_hydra_teleop filter_pointcloud.launch &
-PIDS="$PIDS $!"
 
 #  /voxel_grid1/output == the qualified name of our voxel_grid node's ~/output
 wait_for_topic /voxel_grid1/output
